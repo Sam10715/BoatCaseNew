@@ -27,15 +27,16 @@ public class TripEndPoint {
 
     @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/get-ava-boats", method = RequestMethod.GET)
-    public List<Boat> checkBoatsAva() {
-        return tripService.getAvaBoats();
+    public List<Boat> checkBoatsAva(String type) {
+        return tripService.getAvaBoats(type);
 
     }
 
     @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/start-trip", method = RequestMethod.POST, consumes = "application/json")
-    public void startOneTrip(@RequestBody Trip trip) {
-        tripService.startTrip(trip);
+    public void startOneTrip(@RequestParam String type) {
+
+        tripService.startTrip(type);
 
     }
 

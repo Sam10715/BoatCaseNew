@@ -1,6 +1,8 @@
 package com.example.boat.controller;
 
 import com.example.boat.model.Boat;
+import com.example.boat.model.ElectricalBoat;
+import com.example.boat.model.RowBoat;
 import com.example.boat.model.Trip;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -53,17 +55,21 @@ public class TripService {
     }
 
 
-    public List<Boat> getAvaBoats() {
+    public List<Boat> getAvaBoats(String type) {
+
         List<Trip> trips = new ArrayList<>();
         List<Boat> boats = new ArrayList<>();
         List<Boat> boats1 = boatRepository.findAll();
+        System.out.println(boats1);
         for (Trip t : tripRepository.findAll()) {
-
-            if (t.getTripStatus().equals("In progress")) {
+            changeTripStatus(t);
+            if (t.getTripStatus().equals("In progress") | t.getTripStatus().equals("Charging")) {
 
                 trips.add(t);
+
             }
         }
+        System.out.println(trips);
         for (Trip t1 : trips) {
             boats.add(t1.getBoat());
         }
@@ -75,15 +81,29 @@ public class TripService {
                 }
             }
         }
+
+        if (type.equals("Electrical")) {
+
+            boats1.removeIf((b1 -> (b1 instanceof RowBoat)));
+
+        }
+        if (type.equals("Row")) {
+
+
+            boats1.removeIf((b1 -> (b1 instanceof ElectricalBoat)));
+
+        }
+
+
         boats1.sort(Comparator.comparing(Boat::getCounter));
         return boats1;
 
     }
 
 
-    public void startTrip(Trip trip) {
-
-        List<Boat> boats = getAvaBoats();
+    public void startTrip(String type) {
+        Trip trip = new Trip();
+        List<Boat> boats = getAvaBoats(type);
         trip.setBoat(boats.get(0));
         long counter = boats.get(0).getCounter();
         boats.get(0).setCounter(counter + 1);
@@ -111,7 +131,7 @@ public class TripService {
     public void stopTrip(Trip trip1) {
         Trip trip = tripRepository.findById(trip1.getId());
 
-        trip.setTripStatus("Ended");
+
         LocalDateTime a = trip.getStartDate();
         LocalDateTime b = LocalDateTime.now();
         trip.setEndDate(b);
@@ -120,6 +140,13 @@ public class TripService {
 
         double hours = (x) / 3600;
         trip.setPrice(trip.getBoat().getPricePerHour() * hours);
+
+        if (trip.getBoat() instanceof ElectricalBoat) {
+            trip.setTripStatus("Charging");
+        } else {
+            trip.setTripStatus("Ended");
+        }
+
         tripRepository.save(trip);
 
     }
@@ -171,4 +198,22 @@ public class TripService {
     public List<Trip> getTrips() {
         return tripRepository.findAll();
     }
+
+    public void changeTripStatus(Trip trip) {
+
+        if (trip.getTripStatus().equals("Charging")) {
+            LocalDateTime now = LocalDateTime.now();
+            ElectricalBoat electricalBoat = (ElectricalBoat) trip.getBoat();
+
+            LocalDateTime a = trip.getEndDate();
+            a = a.plusMinutes(electricalBoat.getChargeTime());
+            if (now.isAfter(a)) {
+                trip.setTripStatus("Ended");
+
+
+            }
+
+        }
+    }
 }
+
