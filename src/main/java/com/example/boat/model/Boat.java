@@ -4,6 +4,9 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "Boat")
+@Inheritance(
+        strategy = InheritanceType.JOINED
+)
 public class Boat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
