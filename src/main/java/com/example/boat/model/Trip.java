@@ -19,6 +19,10 @@ public class Trip {
     private String tripStatus;
     @Column(name = "numberofperson")
     private int numberOfPerson;
+    @Column(name = "boattype")
+    private String boatType;
+    @Column(name="reservationstauts")
+    private boolean reservationStatus;
 
     @JoinColumn(name = "boatid", referencedColumnName = "id")
     @OneToOne
@@ -26,6 +30,9 @@ public class Trip {
 
     @Column(name = "price")
     private double price;
+    @JoinColumn(name = "guestid", referencedColumnName = "id")
+    @OneToOne
+    private Guest guest;
 
     public double getPrice() {
         return price;
@@ -75,6 +82,13 @@ public class Trip {
         this.tripStatus = tripStatus;
     }
 
+    public String getBoatType() {
+        return boatType;
+    }
+
+    public void setBoatType(String boatType) {
+        this.boatType = boatType;
+    }
 
     public Boat getBoat() {
         return boat;
@@ -82,5 +96,21 @@ public class Trip {
 
     public void setBoat(Boat boat) {
         this.boat = boat;
+    }
+
+    public boolean isReservationStatus() {
+        return reservationStatus;
+    }
+
+    public void setReservationStatus(boolean reservationStatus) {
+        this.reservationStatus = reservationStatus;
+    }
+
+    public Guest getGuest() {
+        return guest;
+    }
+
+    public void setGuest(Guest guest) {
+        this.guest = guest;
     }
 }

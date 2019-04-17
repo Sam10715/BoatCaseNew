@@ -2,7 +2,7 @@ package com.example.boat.model;
 
 import javax.persistence.*;
 
-@Entity
+@Entity(name = "Guest")
 @Table
 public class Guest {
     @Id
@@ -21,6 +21,7 @@ public class Guest {
 
     @Column(name = "mobilenumber")
     private String mobileNumber;
+
 
     public long getId() {
         return id;
@@ -61,4 +62,6 @@ public class Guest {
     public void setMobileNumber(String mobileNumber) {
         this.mobileNumber = mobileNumber;
     }
+
+
 }

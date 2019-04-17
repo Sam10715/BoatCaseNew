@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface GuestRepository extends CrudRepository<Guest,Long> {
     List<Guest> findAll();
-    Boat findById(long id);
+    Guest findById(long id);
 
 }

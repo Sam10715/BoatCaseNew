@@ -14,12 +14,17 @@ public class Boat {
     private long id;
     @Column(name="numberofseats")
     private  int numberOfSeats;
-    @Column(name="bootnumber")
-    private  int bootNumber;
-    @Column(name="priceperhour")
-    private   double pricePerHour;
+    @Column(name="boatnumber")
+    private  int boatNumber;
+
     @Column(name = "counter")
     private  long counter;
+    @Column(name = "boatmaintenancestatus")
+    private boolean BoatMaintenanceStatus;
+    @Column(name = "boatmaintenanceduration")
+    private int BoatMaintenanceDuration;
+
+
 
     public long getCounter() {
         return counter;
@@ -45,21 +50,28 @@ public class Boat {
         this.numberOfSeats = numberOfSeats;
     }
 
-    public int getBootNumber() {
-        return bootNumber;
+    public int getBoatNumber() {
+        return boatNumber;
     }
 
-    public void setBootNumber(int bootNumber) {
-        this.bootNumber = bootNumber;
+    public void setBoatNumber(int boatNumber) {
+        this.boatNumber = boatNumber;
+    }
+    
+
+    public boolean isBoatMaintenanceStatus() {
+        return BoatMaintenanceStatus;
     }
 
-    public double getPricePerHour() {
-        return pricePerHour;
+    public void setBoatMaintenanceStatus(boolean boatMaintenanceStatus) {
+        BoatMaintenanceStatus = boatMaintenanceStatus;
     }
 
-    public void setPricePerHour(double pricePerHour) {
-        this.pricePerHour = pricePerHour;
+    public int getBoatMaintenanceDuration() {
+        return BoatMaintenanceDuration;
     }
 
-
+    public void setBoatMaintenanceDuration(int boatMaintenanceDuration) {
+        BoatMaintenanceDuration = boatMaintenanceDuration;
+    }
 }
