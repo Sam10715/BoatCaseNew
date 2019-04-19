@@ -21,8 +21,7 @@ public class Boat {
     private  long counter;
     @Column(name = "boatmaintenancestatus")
     private boolean BoatMaintenanceStatus;
-    @Column(name = "boatmaintenanceduration")
-    private int BoatMaintenanceDuration;
+
 
 
 
@@ -67,11 +66,5 @@ public class Boat {
         BoatMaintenanceStatus = boatMaintenanceStatus;
     }
 
-    public int getBoatMaintenanceDuration() {
-        return BoatMaintenanceDuration;
-    }
 
-    public void setBoatMaintenanceDuration(int boatMaintenanceDuration) {
-        BoatMaintenanceDuration = boatMaintenanceDuration;
-    }
 }

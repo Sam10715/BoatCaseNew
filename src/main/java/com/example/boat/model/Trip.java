@@ -30,7 +30,7 @@ public class Trip {
 
     @Column(name = "price")
     private double price;
-    @JoinColumn(name = "guestid", referencedColumnName = "id")
+    @JoinColumn(name = "guestid", referencedColumnName = "id" )
     @OneToOne
     private Guest guest;
 

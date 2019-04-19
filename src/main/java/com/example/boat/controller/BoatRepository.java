@@ -9,5 +9,7 @@ import java.util.List;
 public interface BoatRepository  extends CrudRepository<Boat,Long> {
     List<Boat> findAll();
     Boat findById(long id);
+    void deleteByBoatNumber(int boatNumber);
+
 
 }

@@ -11,7 +11,7 @@ public class PriceService {
     @Autowired
     PriceRepository priceRepository;
 
-    public void changeRowPricePerHour(Price price) {
+    public void changeStandardRowPricePerHour(Price price) {
 
 
         if (priceRepository.findAll().isEmpty()) {
@@ -19,14 +19,14 @@ public class PriceService {
             priceRepository.save(price);
         } else {
             Price p = priceRepository.findAll().get(0);
-            p.setRowBoatPerHourPrice(price.getRowBoatPerHourPrice());
+            p.setRowStanderdPrice(price.getRowStanderdPrice());
 
 
         }
 
     }
 
-    public void changeElcPricePerHour(Price price) {
+    public void changeStandardElcPricePerHour(Price price) {
 
 
         if (priceRepository.findAll().isEmpty()) {
@@ -34,23 +34,7 @@ public class PriceService {
             priceRepository.save(price);
         } else {
             Price p = priceRepository.findAll().get(0);
-            p.setElcBoatPerHourPrice(price.getElcBoatPerHourPrice());
-
-
-        }
-
-
-    }
-
-    public void changeRowResPrice(Price price) {
-
-
-        if (priceRepository.findAll().isEmpty()) {
-
-            priceRepository.save(price);
-        } else {
-            Price p = priceRepository.findAll().get(0);
-            p.setRowReservationPrice(price.getRowReservationPrice());
+            p.setElcStandardPrice(price.getElcStandardPrice());
 
 
         }
@@ -58,7 +42,7 @@ public class PriceService {
 
     }
 
-    public void changeElcResPrice(Price price) {
+    public void changeRowActualPrice(Price price) {
 
 
         if (priceRepository.findAll().isEmpty()) {
@@ -66,7 +50,23 @@ public class PriceService {
             priceRepository.save(price);
         } else {
             Price p = priceRepository.findAll().get(0);
-            p.setElcReservationPrice(price.getElcReservationPrice());
+            p.setRowActualPrice(price.getRowActualPrice());
+
+
+        }
+
+
+    }
+
+    public void changeElcActualPrice(Price price) {
+
+
+        if (priceRepository.findAll().isEmpty()) {
+
+            priceRepository.save(price);
+        } else {
+            Price p = priceRepository.findAll().get(0);
+            p.setElcActualPrice(price.getElcActualPrice());
 
 
         }

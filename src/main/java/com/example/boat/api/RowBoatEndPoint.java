@@ -13,8 +13,8 @@ public class RowBoatEndPoint {
     BoatService boatService;
     @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/save-rowboat", method = RequestMethod.POST, consumes = "application/json")
-    public void saveOneBoat(@RequestBody RowBoat rowBoat) {
-        boatService.saveBoat(rowBoat);
+    public boolean saveOneBoat(@RequestBody RowBoat rowBoat) {
+     return    boatService.saveBoat(rowBoat);
 
     }
 

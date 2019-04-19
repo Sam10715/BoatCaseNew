@@ -12,8 +12,8 @@ public class ElectricalBoatEndPoint {
     BoatService boatService;
     @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/save-electricalboat", method = RequestMethod.POST, consumes = "application/json")
-    public void saveOneBoat(@RequestBody ElectricalBoat electricalBoat) {
-        boatService.saveBoat(electricalBoat);
+    public boolean saveOneBoat(@RequestBody ElectricalBoat electricalBoat) {
+     return    boatService.saveBoat(electricalBoat);
 
     }
 

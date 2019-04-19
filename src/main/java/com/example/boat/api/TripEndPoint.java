@@ -1,7 +1,5 @@
 package com.example.boat.api;
 
-import com.example.boat.controller.BoatService;
-import com.example.boat.controller.TripRepository;
 import com.example.boat.controller.TripService;
 import com.example.boat.model.Boat;
 import com.example.boat.model.Trip;
@@ -26,13 +24,7 @@ public class TripEndPoint {
     }
 
 
-    @CrossOrigin(origins = "http://localhost:4200")
-    @RequestMapping(value = "/get-ava-boats/{type}/{numberOfPersons}", method = RequestMethod.GET)
-    public List<Boat> checkBoatsAva(@PathVariable String type,@PathVariable int numberOfPersons) {
 
-        return tripService.getAvaBoats(type,numberOfPersons);
-
-    }
 
     @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/start-trip", method = RequestMethod.POST, consumes = "application/json")
@@ -52,27 +44,50 @@ public class TripEndPoint {
     }
 
     @CrossOrigin(origins = "http://localhost:4200")
-    @RequestMapping(value = "/get-trip-overview", method = RequestMethod.GET)
-    public List<Integer> getTripOverViews(@RequestParam String date) {
+    @RequestMapping(value = "/get-trip-overview/{date}", method = RequestMethod.GET)
+    public List<Number> getTripOverViews(@PathVariable String date) {
         return tripService.getTripOverView(date);
 
     }
 
     @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/make-reservation", method = RequestMethod.POST, consumes = "application/json")
-    public void doReserve(@RequestBody Trip trip) {
-        tripService.makeReservation(trip);
+    public Trip doReserve(@RequestBody Trip trip) {
+       return tripService.makeReservation(trip);
+
+    }
+
+        @CrossOrigin(origins = "http://localhost:4200")
+    @RequestMapping(value = "/get-Reserved-trips", method = RequestMethod.GET)
+    public List<Trip> getReservedTrips() {
+      return tripService.getReservedTripForToday();
 
     }
 
     @CrossOrigin(origins = "http://localhost:4200")
-    @RequestMapping(value = "/get-avaBoats-reservation", method = RequestMethod.GET)
-    public List<Boat> getAvaBoatsReservations(@RequestParam String start, @RequestParam String end, @RequestParam String type,@RequestParam int numberOfPerson) {
-        LocalDateTime start1 = LocalDateTime.parse(start);
-        LocalDateTime end1 = LocalDateTime.parse(end);
-        return tripService.getAvailableBoatsReservation(start1,end1,type,numberOfPerson);
+    @RequestMapping(value = "/get-allReserved-trips", method = RequestMethod.GET)
+    public List<Trip> getAllReservedTrips() {
+        return tripService.getAllReservedTrips();
 
     }
+    @CrossOrigin(origins = "http://localhost:4200")
+    @RequestMapping(value = "/delete-reservation/{id}", method = RequestMethod.GET)
+    public void deleteReservation(@PathVariable long id) {
+         tripService.deleteReservation(id);
+
+    }
+
+
+    @CrossOrigin(origins = "http://localhost:4200")
+    @RequestMapping(value = "/get-un-reserved-trips", method = RequestMethod.GET)
+    public List<Trip> getUnReservedTrips() {
+        return tripService.getAllUnReservedTrips();
+
+    }
+
+
+
+
 
 
 }

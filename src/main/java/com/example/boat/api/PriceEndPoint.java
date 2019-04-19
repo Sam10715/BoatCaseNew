@@ -13,25 +13,25 @@ public class PriceEndPoint {
     @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/change-row-price", method = RequestMethod.POST, consumes = "application/json")
     public void changeRowPrice(@RequestBody Price price) {
-        priceService.changeRowPricePerHour(price);
+        priceService.changeStandardRowPricePerHour(price);
 
     }
     @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/change-elc-price", method = RequestMethod.POST, consumes = "application/json")
     public void changeElcPrice(@RequestBody Price price) {
-        priceService.changeElcPricePerHour(price);
+        priceService.changeStandardElcPricePerHour(price);
 
     }
     @CrossOrigin(origins = "http://localhost:4200")
-    @RequestMapping(value = "/change-row-res-price", method = RequestMethod.POST, consumes = "application/json")
+    @RequestMapping(value = "/change-row-actual-price", method = RequestMethod.POST, consumes = "application/json")
     public void changeRowResPrice(@RequestBody Price price) {
-        priceService.changeRowResPrice(price);
+        priceService.changeRowActualPrice(price);
 
     }
     @CrossOrigin(origins = "http://localhost:4200")
-    @RequestMapping(value = "/change-elc-res-price", method = RequestMethod.POST, consumes = "application/json")
+    @RequestMapping(value = "/change-elc-actual-price", method = RequestMethod.POST, consumes = "application/json")
     public void changeElcResPrice(@RequestBody Price price) {
-        priceService.changeElcResPrice(price);
+        priceService.changeElcActualPrice(price);
 
     }
 

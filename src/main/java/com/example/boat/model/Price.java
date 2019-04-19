@@ -9,14 +9,14 @@ public class Price {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Access(AccessType.PROPERTY)
     private long id;
-    @Column(name = "rowboatperhourprice")
-    private double rowBoatPerHourPrice;
-    @Column(name = "elcboatperhourprice")
-    private double elcBoatPerHourPrice;
-    @Column(name = "rowreservationprice")
-    private double rowReservationPrice;
-    @Column(name = "elcreservationprice")
-    private double elcReservationPrice;
+    @Column(name = "rowstandaredprice")
+    private double rowStanderdPrice;
+    @Column(name = "elcstandaredprice")
+    private double elcStandardPrice;
+    @Column(name = "rowactualprice")
+    private double rowActualPrice;
+    @Column(name = "elcactualprice")
+    private double elcActualPrice;
 
     public long getId() {
         return id;
@@ -26,35 +26,35 @@ public class Price {
         this.id = id;
     }
 
-    public double getRowBoatPerHourPrice() {
-        return rowBoatPerHourPrice;
+    public double getRowStanderdPrice() {
+        return rowStanderdPrice;
     }
 
-    public void setRowBoatPerHourPrice(double rowBoatPerHourPrice) {
-        this.rowBoatPerHourPrice = rowBoatPerHourPrice;
+    public void setRowStanderdPrice(double rowStanderdPrice) {
+        this.rowStanderdPrice = rowStanderdPrice;
     }
 
-    public double getElcBoatPerHourPrice() {
-        return elcBoatPerHourPrice;
+    public double getElcStandardPrice() {
+        return elcStandardPrice;
     }
 
-    public void setElcBoatPerHourPrice(double elcBoatPerHourPrice) {
-        this.elcBoatPerHourPrice = elcBoatPerHourPrice;
+    public void setElcStandardPrice(double elcStandardPrice) {
+        this.elcStandardPrice = elcStandardPrice;
     }
 
-    public double getRowReservationPrice() {
-        return rowReservationPrice;
+    public double getRowActualPrice() {
+        return rowActualPrice;
     }
 
-    public void setRowReservationPrice(double rowReservationPrice) {
-        this.rowReservationPrice = rowReservationPrice;
+    public void setRowActualPrice(double rowActualPrice) {
+        this.rowActualPrice = rowActualPrice;
     }
 
-    public double getElcReservationPrice() {
-        return elcReservationPrice;
+    public double getElcActualPrice() {
+        return elcActualPrice;
     }
 
-    public void setElcReservationPrice(double elcReservationPrice) {
-        this.elcReservationPrice = elcReservationPrice;
+    public void setElcActualPrice(double elcActualPrice) {
+        this.elcActualPrice = elcActualPrice;
     }
 }
