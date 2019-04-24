@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -47,6 +48,7 @@ public class TripService {
 
         if (trip.getId() != 0) {
             Trip t = tripRepository.findById(trip.getId());
+
             t.setTripStatus("In progress");
             tripRepository.save(t);
 
@@ -62,7 +64,16 @@ public class TripService {
             trip.setTripStatus("In progress");
             trip.setStartDate(LocalDateTime.now());
             Guest g = trip.getGuest();
-            guestRepository.save(g);
+            for (Guest guest : guestRepository.findAll()) {
+                if (guest.getIdType().equals(g.getIdType()) & guest.getIdNumber().equals(g.getIdNumber()) & guest.getName().equals(g.getName())) {
+                    guest.setMobileNumber(g.getMobileNumber());
+                    trip.setGuest(guest);
+                    break;
+                }
+
+            }
+            guestRepository.save(trip.getGuest());
+
             tripRepository.save(trip);
 
 
@@ -93,11 +104,35 @@ public class TripService {
             trip.setTripStatus("Cleaning");
             double price = trip.getPrice();
 
-            //trip.setEndDate(LocalDateTime.now());
+            LocalDateTime a = trip.getStartDate();
+            LocalDateTime b = trip.getEndDate();
+            Duration duration = Duration.between(a, b);
+            double x = duration.getSeconds();
+            double hours = (x) / 3600;
+            if (hours < 1) {
+                hours = 1;
+
+            }
+            double oldPricePerHour = price / hours;
+            trip.setEndDate(LocalDateTime.now());
+
+            LocalDateTime a1 = trip.getStartDate();
+            LocalDateTime b1 = trip.getEndDate();
+
+            Duration duration2 = Duration.between(a1, b1);
+            double x1 = duration2.getSeconds();
+            double hours1 = (x1) / 3600;
+            if (hours1 < 1) {
+                hours1 = 1;
+
+            }
+
+            double price1 = hours1 * oldPricePerHour;
+
             double discount = guestService.discountCal(trip.getGuest());
 
 
-            trip.setPrice(price - price * discount);
+            trip.setPrice(price1 - price1 * discount);
             tripRepository.save(trip);
 
 
@@ -129,31 +164,43 @@ public class TripService {
             }
 
 
-        if (trip.getBoatType().equals("Row")) {
-            double price = priceRepository.findAll().get(0).getRowStanderdPrice() * hours;
-            double price1 = priceRepository.findAll().get(0).getRowActualPrice() * hours;
-            if (price1 > price) {
-                trip.setPrice(price1 - price1 * discount);
-            } else {
-                trip.setPrice(price - price * discount);
+            if (trip.getBoatType().equals("Row")) {
+                double price = priceRepository.findAll().get(0).getRowStanderdPrice() * hours;
+                double price1 = priceRepository.findAll().get(0).getRowActualPrice() * hours;
+                if (price1 > price) {
+                    trip.setPrice(price1 - price1 * discount);
+                } else {
+                    trip.setPrice(price - price * discount);
+                }
+
+
             }
 
-            System.out.println("Price is : " + price);
-            System.out.println("Discount is : " + discount);
+
+            if (trip.getBoat() instanceof ElectricalBoat) {
+                trip.setTripStatus("Charging");
+            } else {
+                trip.setTripStatus("Ended");
+            }
+
+            tripRepository.save(trip);
+
         }
-
-
-        if (trip.getBoat() instanceof ElectricalBoat) {
-            trip.setTripStatus("Charging");
-        } else {
-            trip.setTripStatus("Ended");
-        }
-
-        tripRepository.save(trip);
 
     }
 
-}
+
+    public void deleteEndedTrips() {
+        List<Trip> trips = tripRepository.findAll();
+        for (Trip t : trips) {
+            if (t.getEndDate().isBefore(LocalDateTime.now().minusMonths(1))) {
+                tripRepository.delete(t);
+            }
+
+        }
+
+
+    }
     //********************************************************************
 
 
@@ -200,26 +247,26 @@ public class TripService {
 
                 Duration d = Duration.between(t.getStartDate(), t.getEndDate());
                 endedCounter = endedCounter + 1;
-                avreageDurationCounter =  (d.getSeconds() + avreageDurationCounter);
+                avreageDurationCounter = (d.getSeconds() + avreageDurationCounter);
 
             }
             if (!boatNumbers.contains(t.getBoat().getBoatNumber())) {
                 boatNumbers.add(t.getBoat().getBoatNumber());
             }
-            incomeCounter =  (t.getPrice() + incomeCounter);
+            incomeCounter = (t.getPrice() + incomeCounter);
 
         }
         avreageDurationCounter = avreageDurationCounter / 3600;
         if (endedCounter != 0) {
             avreageDurationCounter = avreageDurationCounter / endedCounter;
         }
-        avreageDurationCounter = avreageDurationCounter*100;
+        avreageDurationCounter = avreageDurationCounter * 100;
         avreageDurationCounter = Math.round(avreageDurationCounter);
-        avreageDurationCounter = avreageDurationCounter /100;
+        avreageDurationCounter = avreageDurationCounter / 100;
 
-        incomeCounter = incomeCounter*100;
+        incomeCounter = incomeCounter * 100;
         incomeCounter = Math.round(incomeCounter);
-        incomeCounter = incomeCounter /100;
+        incomeCounter = incomeCounter / 100;
 
 
         counters.add(inProgressCounter);
@@ -246,7 +293,7 @@ public class TripService {
         LocalDateTime a = trip.getEndDate();
         if (!trip.isReservationStatus()) {
             if (trip.getTripStatus().equals("Charging")) {
-               // LocalDateTime now = LocalDateTime.now();
+                // LocalDateTime now = LocalDateTime.now();
                 ElectricalBoat electricalBoat = (ElectricalBoat) trip.getBoat();
 
                 //LocalDateTime a = trip.getEndDate();
@@ -263,8 +310,8 @@ public class TripService {
 
             if (trip.getTripStatus().equals("Cleaning")) {
 
-             //   LocalDateTime now = LocalDateTime.now();
-               // LocalDateTime a = trip.getEndDate();
+                //   LocalDateTime now = LocalDateTime.now();
+                // LocalDateTime a = trip.getEndDate();
                 a = a.plusMinutes(2);
 
                 if (now.isAfter(a)) {
@@ -284,7 +331,7 @@ public class TripService {
                 }
 
             } else if (trip.getTripStatus().equals("Charging")) {
-              //  LocalDateTime now = LocalDateTime.now();
+                //  LocalDateTime now = LocalDateTime.now();
                 ElectricalBoat electricalBoat = (ElectricalBoat) trip.getBoat();
 
                 //LocalDateTime a = trip.getEndDate();
@@ -338,7 +385,6 @@ public class TripService {
     }
 
 
-
     public List<Trip> getReservedTripByType(String type) {
         List<Trip> trips = tripRepository.findAll();
         List<Trip> trips1 = new ArrayList<>();
@@ -365,10 +411,18 @@ public class TripService {
     }
 
     public boolean checkDateTimeReservation(LocalDateTime startTime, LocalDateTime endTime, Boat boat, String type) {
+        int x = 0;
         List<Trip> currentTrip = getReservedTripByType(type);
         long boatId = boat.getId();
-        startTime = startTime.minusHours(1);
+        if (type.equals("Electrical")) {
+            ElectricalBoat b = (ElectricalBoat) boat;
+            x = b.getChargeTime();
 
+        }
+
+
+        startTime = startTime.minusHours(1).minusMinutes(x);
+        endTime = endTime.plusHours(1).plusMinutes(x);
 
         for (Trip current : currentTrip) {
             if (current.getBoat().getId() != boatId) {
@@ -380,21 +434,40 @@ public class TripService {
 
                 return false;
             }
+            if (startTime.equals(current.getStartDate()) && current.getEndDate().equals(endTime)) {
+
+                return false;
+            }
         }
         return true;
     }
 
 
-
     public Trip makeReservation(Trip trip) {
         long counter = 0;
-        LocalDateTime startDate = trip.getStartDate();
-        LocalDateTime endTime = trip.getEndDate();
+        LocalDateTime startDate;
+        LocalDateTime endTime;
+        startDate = trip.getStartDate();
+        endTime = trip.getEndDate();
+
+//        if (trip.getTripStatus().equals("Un Reserved")) {
+//            startDate = trip.getStartDate();
+//            endTime = trip.getEndDate();
+//
+//        } else {
+//            System.out.println(trip.getStartDate());
+//            startDate = trip.getStartDate().plusHours(2);
+//            endTime = trip.getEndDate().plusHours(2);
+//            trip.setStartDate(startDate);
+//            trip.setEndDate(endTime);
+//        }
+
+
         String type = trip.getBoatType();
         List<Boat> boats = boatService.getAvailableBoatsReservation(startDate, endTime, type, trip.getNumberOfPerson());
 
-        if(boats.size()>0) {
 
+        if (boats.size() > 0) {
 
 
             trip.setTripStatus("Reserved");
@@ -403,7 +476,17 @@ public class TripService {
             boats.get(0).setCounter(counter + 1);
             trip.setReservationStatus(true);
             Guest g = trip.getGuest();
-            guestRepository.save(g);
+            for (Guest guest : guestRepository.findAll()) {
+                if (guest.getIdType().equals(g.getIdType()) & guest.getIdNumber().equals(g.getIdNumber()) & guest.getName().equals(g.getName())) {
+                    guest.setMobileNumber(g.getMobileNumber());
+                    trip.setGuest(guest);
+                    break;
+                }
+
+            }
+            guestRepository.save(trip.getGuest());
+
+
             Duration duration = Duration.between(startDate, endTime);
             double x = duration.getSeconds();
 
@@ -414,45 +497,58 @@ public class TripService {
             }
 
 
-
-                if (trip.getBoatType().equals("Electrical")) {
-                    double price = priceRepository.findAll().get(0).getElcStandardPrice() * hours;
-                    trip.setPrice(price);
-                }
-                if (trip.getBoatType().equals("Row")) {
-                    double price = priceRepository.findAll().get(0).getRowStanderdPrice() * hours;
-                    trip.setPrice(price);
-                }
-
+            if (trip.getBoatType().equals("Electrical")) {
+                double price = priceRepository.findAll().get(0).getElcStandardPrice() * hours;
+                trip.setPrice(price);
+            }
+            if (trip.getBoatType().equals("Row")) {
+                double price = priceRepository.findAll().get(0).getRowStanderdPrice() * hours;
+                trip.setPrice(price);
+            }
 
 
             tripRepository.save(trip);
             return trip;
         }
-      return null;
+        return null;
     }
 
-    public List<Trip> getReservedTripForToday(){
+    public List<Trip> getReservedTripForToday() {
         List<Trip> trips = tripRepository.findAll();
+        List<Trip> trips1 = tripRepository.findAll();
         trips.removeIf((t1 -> (!t1.getTripStatus().equals("Reserved"))));
-        trips.removeIf((t1)->(!t1.getStartDate().toLocalDate().equals(LocalDate.now())));
+        trips.removeIf((t1) -> (!t1.getStartDate().toLocalDate().equals(LocalDate.now())));
+        trips.removeIf((t1) -> (!t1.getStartDate().toLocalTime().isBefore(LocalTime.now().plusMinutes(15))));
+
+        for (Trip t : trips1) {
+            if (t.getTripStatus().equals("In progress")) {
+
+                trips.removeIf((t1) -> (t1.getBoat() == t.getBoat()));
+            }
+
+
+        }
+
 
         return trips;
     }
 
-    public  List<Trip> getAllReservedTrips(){
+    public List<Trip> getAllReservedTrips() {
         List<Trip> trips = tripRepository.findAll();
         trips.removeIf((t1 -> (!t1.getTripStatus().equals("Reserved"))));
         return trips;
     }
-    public void deleteReservation(long id){
-        Trip t=tripRepository.findById(id);
+
+    public void deleteReservation(long id) {
+        Trip t = tripRepository.findById(id);
         Boat b = t.getBoat();
-        b.setCounter(b.getCounter()-1);
+        if(b!=null)
+        { b.setCounter(b.getCounter() - 1);}
         tripRepository.deleteById(id);
 
     }
-    public  List<Trip> getAllUnReservedTrips(){
+
+    public List<Trip> getAllUnReservedTrips() {
         List<Trip> trips = tripRepository.findAll();
         trips.removeIf((t1 -> (!t1.getTripStatus().equals("Un Reserved"))));
         return trips;

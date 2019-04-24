@@ -20,8 +20,9 @@ public class Boat {
     @Column(name = "counter")
     private  long counter;
     @Column(name = "boatmaintenancestatus")
-    private boolean BoatMaintenanceStatus;
+    private String BoatMaintenanceStatus ="Un Blocked";
 
+    private  String availability="available till the end of the day";
 
 
 
@@ -56,15 +57,20 @@ public class Boat {
     public void setBoatNumber(int boatNumber) {
         this.boatNumber = boatNumber;
     }
-    
 
-    public boolean isBoatMaintenanceStatus() {
+    public String getBoatMaintenanceStatus() {
         return BoatMaintenanceStatus;
     }
 
-    public void setBoatMaintenanceStatus(boolean boatMaintenanceStatus) {
+    public void setBoatMaintenanceStatus(String boatMaintenanceStatus) {
         BoatMaintenanceStatus = boatMaintenanceStatus;
     }
 
+    public String getAvailability() {
+        return availability;
+    }
 
+    public void setAvailability(String availability) {
+        this.availability = availability;
+    }
 }

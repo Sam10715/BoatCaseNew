@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class PriceService {
     @Autowired
     PriceRepository priceRepository;
+    @Autowired
+    WeatherService weatherService;
 
     public void changeStandardRowPricePerHour(Price price) {
 
@@ -17,12 +19,15 @@ public class PriceService {
         if (priceRepository.findAll().isEmpty()) {
 
             priceRepository.save(price);
+
         } else {
             Price p = priceRepository.findAll().get(0);
             p.setRowStanderdPrice(price.getRowStanderdPrice());
 
 
         }
+        weatherService.changePriceBasedOnWeather();
+
 
     }
 
@@ -32,13 +37,14 @@ public class PriceService {
         if (priceRepository.findAll().isEmpty()) {
 
             priceRepository.save(price);
+
         } else {
             Price p = priceRepository.findAll().get(0);
             p.setElcStandardPrice(price.getElcStandardPrice());
 
 
         }
-
+weatherService.changePriceBasedOnWeather();
 
     }
 
@@ -48,6 +54,7 @@ public class PriceService {
         if (priceRepository.findAll().isEmpty()) {
 
             priceRepository.save(price);
+
         } else {
             Price p = priceRepository.findAll().get(0);
             p.setRowActualPrice(price.getRowActualPrice());
@@ -64,6 +71,7 @@ public class PriceService {
         if (priceRepository.findAll().isEmpty()) {
 
             priceRepository.save(price);
+
         } else {
             Price p = priceRepository.findAll().get(0);
             p.setElcActualPrice(price.getElcActualPrice());
@@ -72,6 +80,10 @@ public class PriceService {
         }
 
 
+    }
+    public Price getPrice(){
+
+        return priceRepository.findAll().get(0);
     }
 
 

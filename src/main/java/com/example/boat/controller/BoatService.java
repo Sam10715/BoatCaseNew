@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -35,6 +36,12 @@ public class BoatService {
             }
         }
         boatRepository.save(boat);
+
+        List<Trip> trips1 = tripService.getAllUnReservedTrips();
+        for (Trip trip : trips1) {
+            tripService.makeReservation(trip);
+        }
+
         return true;
     }
 
@@ -69,7 +76,7 @@ public class BoatService {
 
             }
 
-            incomeCounter =  (k.getPrice() + incomeCounter);
+            incomeCounter = (k.getPrice() + incomeCounter);
 
         }
 
@@ -82,14 +89,13 @@ public class BoatService {
             type = -2;
         }
 
-        incomeCounter = incomeCounter*100;
+        incomeCounter = incomeCounter * 100;
         incomeCounter = Math.round(incomeCounter);
-        incomeCounter = incomeCounter /100;
+        incomeCounter = incomeCounter / 100;
 
-        avreageDurationCounter = avreageDurationCounter*100;
+        avreageDurationCounter = avreageDurationCounter * 100;
         avreageDurationCounter = Math.round(avreageDurationCounter);
-        avreageDurationCounter = avreageDurationCounter /100;
-
+        avreageDurationCounter = avreageDurationCounter / 100;
 
 
         counters.add(boat.getBoatNumber());
@@ -106,7 +112,6 @@ public class BoatService {
     public List<List<Number>> allBoatsOverView(String date) {
 
 
-
         List<Boat> boats = boatRepository.findAll();
         List<List<Number>> counters = new ArrayList<>();
         List<Number> counter1 = new ArrayList<>();
@@ -116,17 +121,17 @@ public class BoatService {
         for (Boat b : boats) {
 
             List<Number> a = oneBoatOverView(date, b);
-            totalIncome = (double)a.get(3) + totalIncome;
-            totalTime = (double)a.get(4) + totalTime;
+            totalIncome = (double) a.get(3) + totalIncome;
+            totalTime = (double) a.get(4) + totalTime;
             counters.add(a);
         }
-        totalIncome = totalIncome*100;
+        totalIncome = totalIncome * 100;
         totalIncome = Math.round(totalIncome);
-        totalIncome = totalIncome /100;
+        totalIncome = totalIncome / 100;
 
-        totalTime = totalTime*100;
+        totalTime = totalTime * 100;
         totalTime = Math.round(totalTime);
-        totalTime = totalTime /100;
+        totalTime = totalTime / 100;
 
         counter1.add(totalIncome);
         counter1.add(totalTime);
@@ -139,54 +144,27 @@ public class BoatService {
     }
 
     public void blockBoat(int boatNumber) {
-        List<Trip> trips = new ArrayList<>();
-        for (Boat b : boatRepository.findAll()) {
+        Boat b = boatRepository.findByBoatNumber(boatNumber);
 
-            if (b.getBoatNumber() == boatNumber) {
-                b.setBoatMaintenanceStatus(true);
-                boatRepository.save(b);
-                break;
-            }
-        }
-
-        for (Trip trip : tripRepository.findAll()) {
-            if (trip.getTripStatus().equals("Reserved")) {
-                if (trip.getBoat().getBoatNumber() == boatNumber) {
-                    Boat b =trip.getBoat();
-                    b.setCounter(b.getCounter() -1);
-                    trip.setTripStatus("Un Reserved");
-                    trip.setBoat(null);
-
-                    tripService.makeReservation(trip);
+        b.setBoatMaintenanceStatus("Blocked");
 
 
-                }
-
-            }
-
-
-        }
-        for (Trip trip : tripRepository.findAll()) {
-            if (trip.getTripStatus().equals("Un Reserved")) {
-                trips.add(trip);
-            }
-        }
-
-
+        boatRepository.save(b);
+        makeReservationForUnReservedTrips(boatNumber, b);
     }
 
     public void unBlockBoat(int boatNumber) {
         for (Boat b : boatRepository.findAll()) {
 
             if (b.getBoatNumber() == boatNumber) {
-                b.setBoatMaintenanceStatus(false);
+                b.setBoatMaintenanceStatus("Un Blocked");
 
                 boatRepository.save(b);
                 break;
             }
         }
-        List<Trip> trips1= tripService.getAllUnReservedTrips();
-        for(Trip trip:trips1){
+        List<Trip> trips1 = tripService.getAllUnReservedTrips();
+        for (Trip trip : trips1) {
             tripService.makeReservation(trip);
         }
 
@@ -235,12 +213,13 @@ public class BoatService {
                 }
             }
         }
-
+        boats1.forEach(boat -> boat.setAvailability("available till the end of the day"));
 
         if (type.equals("Electrical")) {
 
             boats1.removeIf((b1 -> (b1 instanceof RowBoat)));
-            boats1.removeIf((b1 -> (b1.isBoatMaintenanceStatus())));
+            boats1.removeIf((b1 -> (b1.getBoatMaintenanceStatus().equals("Blocked"))));
+            boats1.removeIf((b1 -> (b1.getBoatMaintenanceStatus().equals("disabled"))));
             boats1.removeIf((b1 -> (b1.getNumberOfSeats()) < numberOfPoeple));
 
         }
@@ -248,13 +227,15 @@ public class BoatService {
 
 
             boats1.removeIf((b1 -> (b1 instanceof ElectricalBoat)));
-            boats1.removeIf((b1 -> (b1.isBoatMaintenanceStatus())));
+            boats1.removeIf((b1 -> (b1.getBoatMaintenanceStatus().equals("Blocked"))));
+            boats1.removeIf((b1 -> (b1.getBoatMaintenanceStatus().equals("disabled"))));
             boats1.removeIf((b1 -> (b1.getNumberOfSeats()) < numberOfPoeple));
 
         }
         if (boats1.isEmpty()) {
             boats1 = getAvaReservedBoatForToday(type);
-            boats1.removeIf((b1 -> (b1.isBoatMaintenanceStatus())));
+            boats1.removeIf((b1 -> (b1.getBoatMaintenanceStatus().equals("Blocked"))));
+            boats1.removeIf((b1 -> (b1.getBoatMaintenanceStatus().equals("disabled"))));
             boats1.removeIf((b1 -> (b1.getNumberOfSeats()) < numberOfPoeple));
 
             return boats1;
@@ -295,11 +276,21 @@ public class BoatService {
                 a = a.plusHours(1);
 
                 if (t1.getStartDate().isAfter(a)) {
+                    LocalDateTime c = t1.getStartDate().minusMinutes(b.getChargeTime());
+                    System.out.println(t1.getStartDate());
+
+                    String x = c.toLocalTime().toString();
+                    b.setAvailability("available till : " + x);
+
                     boats.add(t1.getBoat());
                 }
             } else if (t1.getBoatType().equals("Row")) {
                 a = a.plusHours(1);
                 if (t1.getStartDate().isAfter(a)) {
+                    String k = t1.getStartDate().toLocalTime().toString();
+
+
+                    t1.getBoat().setAvailability("available till : " + k);
                     boats.add(t1.getBoat());
                 }
 
@@ -310,8 +301,10 @@ public class BoatService {
     }
 
     public List<Boat> getAvailableBoatsReservation(LocalDateTime startTime, LocalDateTime endTime, String type, int numberOfPoeple) {
+
         String date = startTime.toString();
         List<Boat> boats = getAvaBoatsByDateAndType(date, type, numberOfPoeple);
+        //  List<Boat> boats = getAvaBoats( type, numberOfPoeple);
 
         List<Boat> availableBoats = new ArrayList<>();
         for (Boat boat : boats) {
@@ -329,12 +322,14 @@ public class BoatService {
     }
 
     public List<Boat> getAvaBoatsByDateAndType(String date, String type, int numberOfPoeple) {
-        List<Trip> trips = tripService.getInProgressAndChargingTripsByDate(date);
+
         List<Boat> boats = new ArrayList<>();
         List<Boat> boats1 = boatRepository.findAll();
         for (Trip t : tripRepository.findAll()) {
             tripService.changeTripStatus(t);
         }
+        List<Trip> trips = tripService.getInProgressAndChargingTripsByDate(date);
+
         for (Trip t1 : trips) {
             boats.add(t1.getBoat());
         }
@@ -347,12 +342,14 @@ public class BoatService {
         }
         if (type.equals("Electrical")) {
             boats1.removeIf((b1 -> (b1 instanceof RowBoat)));
-            boats1.removeIf((b1 -> (b1.isBoatMaintenanceStatus())));
+            boats1.removeIf((b1 -> (b1.getBoatMaintenanceStatus().equals("Blocked"))));
+            boats1.removeIf((b1 -> (b1.getBoatMaintenanceStatus().equals("disabled"))));
             boats1.removeIf((b1 -> (b1.getNumberOfSeats()) < numberOfPoeple));
         }
         if (type.equals("Row")) {
             boats1.removeIf((b1 -> (b1 instanceof ElectricalBoat)));
-            boats1.removeIf((b1 -> (b1.isBoatMaintenanceStatus())));
+            boats1.removeIf((b1 -> (b1.getBoatMaintenanceStatus().equals("Blocked"))));
+            boats1.removeIf((b1 -> (b1.getBoatMaintenanceStatus().equals("disabled"))));
             boats1.removeIf((b1 -> (b1.getNumberOfSeats()) < numberOfPoeple));
         }
 
@@ -361,32 +358,90 @@ public class BoatService {
 
     }
 
-   public List<Boat> getUnBlockedBoats(){
+    public List<Boat> getUnBlockedBoats() {
 
         List<Boat> boats = boatRepository.findAll();
-         boats.removeIf((b)->(!b.isBoatMaintenanceStatus()));
-         return boats;
-
-   }
-    public List<Boat> getBlockedBoats(){
-
-        List<Boat> boats = boatRepository.findAll();
-        boats.removeIf((b)->(b.isBoatMaintenanceStatus()));
+        boats.removeIf((b) -> (b.getBoatMaintenanceStatus().equals("Un Blocked")));
+        boats.removeIf((b) -> (b.getBoatMaintenanceStatus().equals("disabled")));
         return boats;
 
     }
-    public void deleteBoat(int boatNumber){
+
+    public List<Boat> getBlockedBoats() {
+
+        List<Boat> boats = boatRepository.findAll();
+        boats.removeIf((b) -> (b.getBoatMaintenanceStatus().equals("Blocked")));
+        boats.removeIf((b) -> (b.getBoatMaintenanceStatus().equals("disabled")));
+        return boats;
+
+    }
+
+    public void disableBoat(int boatNumber) {
 
 
+        Boat b = boatRepository.findByBoatNumber(boatNumber);
+
+        b.setBoatMaintenanceStatus("disabled");
 
 
-      boatRepository.deleteByBoatNumber(boatNumber);
+        boatRepository.save(b);
+        makeReservationForUnReservedTrips(boatNumber, b);
+    }
+
+    public List<Boat> getAllWorkingBoat() {
+        List<Boat> boats = boatRepository.findAll();
+        boats.removeIf((b) -> (b.getBoatMaintenanceStatus().equals("disabled")));
+        return boats;
+
+    }
+
+    public List<Boat> getAllBoats() {
+        List<Boat> boats = boatRepository.findAll();
+        return boats;
+
+    }
+
+    public void deleteBoat(int boatNumber) {
+        Boat b = boatRepository.findByBoatNumber(boatNumber);
+
+        tripRepository.findAll().forEach((t) -> {
+            if (t.getTripStatus().equals("Ended")) {
+
+                if (t.getBoat().equals(b))
+                    tripRepository.delete(t);
+
+
+            }
+        });
+        boatRepository.delete(b);
+
+    }
+
+    public List<Boat> getDisabledBoats() {
+        List<Boat> boats = boatRepository.findAll();
+        boats.removeIf((b) -> (!b.getBoatMaintenanceStatus().equals("disabled")));
+        return boats;
 
 
     }
-    public List<Boat> getAllBoat(){
 
-     return    boatRepository.findAll();
+    public void makeReservationForUnReservedTrips(int boatNumber, Boat b) {
+        for (Trip trip : tripRepository.findAll()) {
+            if (trip.getTripStatus().equals("Reserved")) {
+                if (trip.getBoat().getBoatNumber() == boatNumber) {
+                    b = trip.getBoat();
+                    b.setCounter(b.getCounter() - 1);
+                    trip.setTripStatus("Un Reserved");
+                    trip.setBoat(null);
 
+                    tripService.makeReservation(trip);
+
+
+                }
+
+            }
+
+
+        }
     }
 }

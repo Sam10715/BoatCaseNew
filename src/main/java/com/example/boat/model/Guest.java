@@ -22,6 +22,9 @@ public class Guest {
     @Column(name = "mobilenumber")
     private String mobileNumber;
 
+    @Column(name = "counter")
+    private  long counter;
+
 
     public long getId() {
         return id;
@@ -63,5 +66,11 @@ public class Guest {
         this.mobileNumber = mobileNumber;
     }
 
+    public long getCounter() {
+        return counter;
+    }
 
+    public void setCounter(long counter) {
+        this.counter = counter;
+    }
 }

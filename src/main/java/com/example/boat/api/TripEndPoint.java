@@ -19,7 +19,9 @@ public class TripEndPoint {
     @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/get-all-trips", method = RequestMethod.GET)
     public List<Trip> getAllTrips() {
+
         return tripService.getTrips();
+
 
     }
 
@@ -60,6 +62,7 @@ public class TripEndPoint {
         @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/get-Reserved-trips", method = RequestMethod.GET)
     public List<Trip> getReservedTrips() {
+
       return tripService.getReservedTripForToday();
 
     }
@@ -84,6 +87,14 @@ public class TripEndPoint {
         return tripService.getAllUnReservedTrips();
 
     }
+
+    @CrossOrigin(origins = "http://localhost:4200")
+    @RequestMapping(value = "/delete-ended-trips", method = RequestMethod.DELETE)
+    public void DeleteEndedTrips() {
+         tripService.deleteEndedTrips();
+
+    }
+
 
 
 
