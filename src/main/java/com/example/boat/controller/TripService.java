@@ -65,7 +65,7 @@ public class TripService {
             trip.setStartDate(LocalDateTime.now());
             Guest g = trip.getGuest();
             for (Guest guest : guestRepository.findAll()) {
-                if (guest.getIdType().equals(g.getIdType()) & guest.getIdNumber().equals(g.getIdNumber()) & guest.getName().equals(g.getName())) {
+                if (guest.getIdType().equalsIgnoreCase(g.getIdType()) & guest.getIdNumber().equals(g.getIdNumber()) & guest.getName().equals(g.getName())) {
                     guest.setMobileNumber(g.getMobileNumber());
                     trip.setGuest(guest);
                     break;
@@ -521,7 +521,7 @@ public class TripService {
         trips.removeIf((t1) -> (!t1.getStartDate().toLocalTime().isBefore(LocalTime.now().plusMinutes(15))));
 
         for (Trip t : trips1) {
-            if (t.getTripStatus().equals("In progress")) {
+            if (t.getTripStatus().equals("In progress")|t.getTripStatus().equals("Charging")) {
 
                 trips.removeIf((t1) -> (t1.getBoat() == t.getBoat()));
             }

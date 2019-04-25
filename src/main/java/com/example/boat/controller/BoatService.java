@@ -250,16 +250,19 @@ public class BoatService {
     }
 
     public List<Boat> getAvaReservedBoatForToday(String type) {
+        List<Boat> boat1 = getInProgressBoats();
         List<Trip> trips = tripRepository.findAll();
         List<Trip> trips1 = new ArrayList<>();
         List<Boat> boats = new ArrayList<>();
-        LocalDateTime a = LocalDateTime.now();
+
         for (Trip t : trips) {
 
             if (t.getTripStatus().equals("Reserved")) {
                 if (t.getBoatType().equals(type)) {
                     if (t.getStartDate().toLocalDate().equals(LocalDateTime.now().toLocalDate())) {
-                        trips1.add(t);
+                        if (!boat1.contains(t.getBoat())) {
+                            trips1.add(t);
+                        }
 
 
                     }
@@ -268,16 +271,18 @@ public class BoatService {
             }
 
         }
+        System.out.println(trips1);
         trips1.sort(Comparator.comparing(Trip::getStartDate).reversed());
         for (Trip t1 : trips1) {
             if (t1.getBoatType().equals("Electrical")) {
+                LocalDateTime a = LocalDateTime.now();
                 ElectricalBoat b = (ElectricalBoat) (t1.getBoat());
                 a = a.plusMinutes(b.getChargeTime());
                 a = a.plusHours(1);
 
                 if (t1.getStartDate().isAfter(a)) {
                     LocalDateTime c = t1.getStartDate().minusMinutes(b.getChargeTime());
-                    System.out.println(t1.getStartDate());
+
 
                     String x = c.toLocalTime().toString();
                     b.setAvailability("available till : " + x);
@@ -285,18 +290,22 @@ public class BoatService {
                     boats.add(t1.getBoat());
                 }
             } else if (t1.getBoatType().equals("Row")) {
+                LocalDateTime a = LocalDateTime.now();
                 a = a.plusHours(1);
                 if (t1.getStartDate().isAfter(a)) {
+
                     String k = t1.getStartDate().toLocalTime().toString();
 
 
                     t1.getBoat().setAvailability("available till : " + k);
+
                     boats.add(t1.getBoat());
                 }
 
             }
 
         }
+        System.out.println(boats);
         return boats;
     }
 
@@ -405,7 +414,7 @@ public class BoatService {
         Boat b = boatRepository.findByBoatNumber(boatNumber);
 
         tripRepository.findAll().forEach((t) -> {
-            if (t.getTripStatus().equals("Ended")) {
+            if (t.getTripStatus().equals("Ended")|t.getTripStatus().equals("Charging")|t.getTripStatus().equals("Cleaning")) {
 
                 if (t.getBoat().equals(b))
                     tripRepository.delete(t);
