@@ -65,7 +65,7 @@ public class TripService {
             trip.setStartDate(LocalDateTime.now());
             Guest g = trip.getGuest();
             for (Guest guest : guestRepository.findAll()) {
-                if (guest.getIdType().equalsIgnoreCase(g.getIdType()) & guest.getIdNumber().equals(g.getIdNumber()) & guest.getName().equals(g.getName())) {
+                if (guest.getIdType().equalsIgnoreCase(g.getIdType()) & guest.getIdNumber().equals(g.getIdNumber()) & guest.getName().equalsIgnoreCase(g.getName())) {
                     guest.setMobileNumber(g.getMobileNumber());
                     trip.setGuest(guest);
                     break;
@@ -477,7 +477,7 @@ public class TripService {
             trip.setReservationStatus(true);
             Guest g = trip.getGuest();
             for (Guest guest : guestRepository.findAll()) {
-                if (guest.getIdType().equals(g.getIdType()) & guest.getIdNumber().equals(g.getIdNumber()) & guest.getName().equals(g.getName())) {
+                if (guest.getIdType().equalsIgnoreCase(g.getIdType()) & guest.getIdNumber().equals(g.getIdNumber()) & guest.getName().equalsIgnoreCase(g.getName())) {
                     guest.setMobileNumber(g.getMobileNumber());
                     trip.setGuest(guest);
                     break;

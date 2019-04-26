@@ -277,7 +277,7 @@ public class BoatService {
 
 
 
-        System.out.println(trips1);
+
         trips1.sort(Comparator.comparing(Trip::getStartDate).reversed());
         for (Trip t1 : trips1) {
             if (t1.getBoatType().equals("Electrical")) {
