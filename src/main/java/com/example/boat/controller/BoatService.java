@@ -13,10 +13,7 @@ import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Component
 @Transactional
@@ -51,6 +48,7 @@ public class BoatService {
         int endedCounter = 0;
         double incomeCounter = 0;
         double avreageDurationCounter = 0;
+
         int type = 0;
 
         List<Number> counters = new ArrayList<>();
@@ -97,6 +95,7 @@ public class BoatService {
         avreageDurationCounter = Math.round(avreageDurationCounter);
         avreageDurationCounter = avreageDurationCounter / 100;
 
+        int numberOfSeats = boat.getNumberOfSeats();
 
         counters.add(boat.getBoatNumber());
         counters.add(inProgressCounter);
@@ -104,6 +103,7 @@ public class BoatService {
         counters.add(incomeCounter);
         counters.add(avreageDurationCounter);
         counters.add(type);
+        counters.add(numberOfSeats);
 
 
         return counters;
@@ -254,10 +254,12 @@ public class BoatService {
         List<Trip> trips = tripRepository.findAll();
         List<Trip> trips1 = new ArrayList<>();
         List<Boat> boats = new ArrayList<>();
+        List<Boat> boats2 = new ArrayList<>();
 
         for (Trip t : trips) {
 
             if (t.getTripStatus().equals("Reserved")) {
+
                 if (t.getBoatType().equals(type)) {
                     if (t.getStartDate().toLocalDate().equals(LocalDateTime.now().toLocalDate())) {
                         if (!boat1.contains(t.getBoat())) {
@@ -269,8 +271,12 @@ public class BoatService {
 
                 }
             }
-
         }
+
+
+
+
+
         System.out.println(trips1);
         trips1.sort(Comparator.comparing(Trip::getStartDate).reversed());
         for (Trip t1 : trips1) {
@@ -286,8 +292,15 @@ public class BoatService {
 
                     String x = c.toLocalTime().toString();
                     b.setAvailability("available till : " + x);
+                    if (!boats.contains(t1.getBoat())) {
+                        boats.add(t1.getBoat());
+                    }
+//                    boats.add(t1.getBoat());
 
-                    boats.add(t1.getBoat());
+                }
+                else {
+                    boats2.add(t1.getBoat());
+
                 }
             } else if (t1.getBoatType().equals("Row")) {
                 LocalDateTime a = LocalDateTime.now();
@@ -299,13 +312,34 @@ public class BoatService {
 
                     t1.getBoat().setAvailability("available till : " + k);
 
-                    boats.add(t1.getBoat());
+
+                    if (!boats.contains(t1.getBoat())) {
+                        boats.add(t1.getBoat());
+                    }
+//                    boats.add(t1.getBoat());
+                }
+                else {
+
+                        boats2.add(t1.getBoat());
+
+
                 }
 
             }
 
         }
-        System.out.println(boats);
+
+        boats.removeIf((b)->boats2.contains(b));
+        Collections.reverse(boats);
+
+        for(Trip t:tripRepository.findAll()){
+            if (t.getTripStatus().equals("Charging")|t.getTripStatus().equals("Cleaning")){
+
+                boats.removeIf(boat -> t.getBoat().equals(boat));
+            }
+        }
+
+
         return boats;
     }
 
@@ -414,7 +448,7 @@ public class BoatService {
         Boat b = boatRepository.findByBoatNumber(boatNumber);
 
         tripRepository.findAll().forEach((t) -> {
-            if (t.getTripStatus().equals("Ended")|t.getTripStatus().equals("Charging")|t.getTripStatus().equals("Cleaning")) {
+            if (t.getTripStatus().equals("Ended") | t.getTripStatus().equals("Charging") | t.getTripStatus().equals("Cleaning")) {
 
                 if (t.getBoat().equals(b))
                     tripRepository.delete(t);
